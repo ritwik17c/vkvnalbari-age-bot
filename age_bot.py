@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
+ADMIN_ID = 1221035175  # VKV Nalbari Admin
 
 # Conversation state
 WAITING_FOR_DOB = 1
@@ -102,6 +103,21 @@ async def receive_dob(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     await update.message.reply_text(response, parse_mode="Markdown", reply_markup=main_keyboard())
+
+    # Notify admin
+    user = update.message.from_user
+    username = f"@{user.username}" if user.username else f"{user.first_name} (ID: {user.id})"
+    notify = (
+        f"📊 *New Age Query*\n\n"
+        f"👤 User: {username}\n"
+        f"📅 DOB entered: *{dob.strftime('%d %B %Y')}*\n"
+        f"🎂 Result: *{years}y {months}m {days}d*"
+    )
+    try:
+        await context.bot.send_message(chat_id=ADMIN_ID, text=notify, parse_mode="Markdown")
+    except Exception as e:
+        logger.warning(f"Could not notify admin: {e}")
+
     return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -147,6 +163,20 @@ async def age_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown",
         reply_markup=main_keyboard()
     )
+
+    # Notify admin
+    user = update.message.from_user
+    username = f"@{user.username}" if user.username else f"{user.first_name} (ID: {user.id})"
+    notify = (
+        f"📊 *New Age Query*\n\n"
+        f"👤 User: {username}\n"
+        f"📅 DOB entered: *{dob.strftime('%d %B %Y')}*\n"
+        f"🎂 Result: *{years}y {months}m {days}d*"
+    )
+    try:
+        await context.bot.send_message(chat_id=ADMIN_ID, text=notify, parse_mode="Markdown")
+    except Exception as e:
+        logger.warning(f"Could not notify admin: {e}")
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
